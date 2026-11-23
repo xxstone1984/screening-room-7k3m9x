@@ -179,7 +179,12 @@ function navigate(room) {
     else button.removeAttribute("aria-current");
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (allowed === "gallery") requestAnimationFrame(loadPhotosNearViewport);
+  if (allowed === "gallery") {
+    requestAnimationFrame(() => {
+      loadPhotosNearViewport();
+      loadVideosNearViewport();
+    });
+  }
 }
 
 async function loadMedia() {
@@ -418,6 +423,20 @@ function loadPhotosNearViewport() {
   }
 }
 
+function loadVideosNearViewport() {
+  if (galleryTab !== "videos") return;
+  const view = document.querySelector("#view-gallery");
+  if (!view?.classList.contains("active")) return;
+  for (const node of document.querySelectorAll("#videoGrid video[data-src]")) {
+    const rect = node.getBoundingClientRect();
+    if (rect.bottom >= -300 && rect.top <= window.innerHeight + 300) {
+      node.preload = "metadata";
+      node.src = node.dataset.src;
+      delete node.dataset.src;
+    }
+  }
+}
+
 function registerPhotoElement(image, src, eager) {
   image.loading = "eager";
   image.decoding = "async";
@@ -490,7 +509,10 @@ function renderGallery() {
     });
   }
 
-  requestAnimationFrame(loadPhotosNearViewport);
+  requestAnimationFrame(() => {
+    loadPhotosNearViewport();
+    loadVideosNearViewport();
+  });
 
   const videoGrid = $("videoGrid");
   clearNode(videoGrid);
@@ -509,13 +531,20 @@ function renderGallery() {
     for (const video of videos) {
       const card = el("article", "media-card video");
       const node = document.createElement("video");
-      node.src = video.src;
+      node.dataset.src = video.src;
       node.controls = true;
-      node.preload = "metadata";
+      node.preload = "none";
       node.playsInline = true;
       node.setAttribute("playsinline", "");
       node.setAttribute("webkit-playsinline", "");
       node.setAttribute("x5-playsinline", "");
+      node.addEventListener("pointerdown", () => {
+        if (!node.src && node.dataset.src) {
+          node.preload = "metadata";
+          node.src = node.dataset.src;
+          delete node.dataset.src;
+        }
+      });
       node.setAttribute("aria-label", video.name || "视频");
       const overlay = el("div", "media-overlay");
       overlay.append(el("span", "", video.name || "未命名视频"));
