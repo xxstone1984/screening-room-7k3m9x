@@ -739,12 +739,19 @@ function loadPhotoElement(image) {
 function loadPhotosNearViewport() {
   const view = document.querySelector("#view-gallery");
   if (!view?.classList.contains("active")) return;
+  const viewportCenter = window.innerHeight / 2;
+  const candidates = [];
   for (const image of document.querySelectorAll("#photoGrid img[data-src]")) {
     const rect = image.getBoundingClientRect();
     if (rect.bottom >= -PHOTO_LOAD_MARGIN && rect.top <= window.innerHeight + PHOTO_LOAD_MARGIN) {
-      loadPhotoElement(image);
+      candidates.push({
+        image,
+        distance: Math.abs((rect.top + rect.bottom) / 2 - viewportCenter)
+      });
     }
   }
+  candidates.sort((left, right) => left.distance - right.distance);
+  for (const candidate of candidates) loadPhotoElement(candidate.image);
 }
 
 function schedulePhotoLoad() {
