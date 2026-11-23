@@ -309,7 +309,7 @@ function navigate(room) {
     else button.removeAttribute("aria-current");
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (allowed === "gallery") requestAnimationFrame(loadPhotosNearViewport);
+  if (allowed === "gallery") requestAnimationFrame(schedulePhotoLoad);
 }
 
 async function loadMedia() {
@@ -726,6 +726,7 @@ function closeLightbox() {
 const PHOTO_EAGER_COUNT = 8;
 const PHOTO_LOAD_MARGIN = 800;
 let photoLazyObserver = null;
+let photoLoadTimer = 0;
 
 function getPhotoObserver() {
   if (photoLazyObserver || !("IntersectionObserver" in window)) return photoLazyObserver;
@@ -754,6 +755,14 @@ function loadPhotosNearViewport() {
       loadPhotoElement(image);
     }
   }
+}
+
+function schedulePhotoLoad() {
+  if (photoLoadTimer) return;
+  photoLoadTimer = setTimeout(() => {
+    photoLoadTimer = 0;
+    loadPhotosNearViewport();
+  }, 100);
 }
 
 function registerPhotoElement(image, src, eager) {
@@ -843,7 +852,7 @@ function renderGallery() {
     });
   }
 
-  requestAnimationFrame(loadPhotosNearViewport);
+  requestAnimationFrame(schedulePhotoLoad);
 
   const videoGrid = $("videoGrid");
   clearNode(videoGrid);
@@ -1392,6 +1401,8 @@ function handleTicketSubmit(event) {
 function bindEvents() {
   $("ticketForm").addEventListener("submit", handleTicketSubmit);
   $("enterCinemaBtn").addEventListener("click", showApp);
+  document.addEventListener("scroll", schedulePhotoLoad, { passive: true, capture: true });
+  window.addEventListener("resize", schedulePhotoLoad, { passive: true });
   $("roomNav").addEventListener("click", (event) => {
     const button = event.target.closest("[data-room]");
     if (button) navigate(button.dataset.room);
