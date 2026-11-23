@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="家庭私密放映厅：今日放映、角色宇宙、胶片仓库、鹿语邮局和我们的场记。" />
+    <meta name="color-scheme" content="light" />
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+    <meta name="referrer" content="no-referrer" />
+    <title>白鹿私人放映厅 · 家庭链接</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app" hidden>
+      <header class="topbar">
+        <a class="brand" href="#today" id="brandHome" aria-label="回到今日放映">
+          <span class="brand-mark">鹿</span>
+          <span class="brand-copy">
+            <strong>白鹿私人放映厅</strong>
+            <small id="brandCode">FAMILY SCREENING ROOM · NO.0414</small>
+          </span>
+        </a>
+        <nav class="room-nav" id="roomNav" aria-label="放映厅房间">
+          <button type="button" data-room="today" aria-current="page">今日放映</button>
+          <button type="button" data-room="roles">角色宇宙</button>
+          <button type="button" data-room="gallery">胶片仓库</button>
+          <button type="button" data-room="quotes">鹿语邮局</button>
+          <button type="button" data-room="diary">我们的场记</button>
+        </nav>
+        <div class="top-actions">
+          <button class="action-btn" id="importNewsBtn" type="button" title="导入本周片单">
+            <span aria-hidden="true">＋</span><span class="button-label">导入片单</span>
+          </button>
+          <button class="action-btn" id="settingsBtn" type="button" title="放映厅设置">
+            <span aria-hidden="true">⚙</span><span class="button-label">设置</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="view active" data-view="today" id="view-today">
+          <div class="shell">
+            <div class="today-hero">
+              <div>
+                <p class="eyebrow">TODAY'S SCREENING · <strong id="todayDate"></strong></p>
+                <h1>今晚，<br /><em>只为你放映。</em></h1>
+                <p class="lede">
+                  这里不是刷不完的资讯瀑布。每周只选几件真正值得看的事，配上你喜欢的角色、照片和视频。
+                  灯暗下来以后，慢慢看。
+                </p>
+                <div class="hero-actions">
+                  <button class="btn" id="shuffleBtn" type="button">换一张片单</button>
+                  <button class="btn ghost" id="openUpdateBtn" type="button">导入本周片单</button>
+                </div>
+              </div>
+              <aside class="hero-note">
+                <strong>观影须知</strong>
+                片单、照片和视频由家人统一发布，打开链接就能看；页面里新增的场记只保存在当前设备。
+                请勿把链接转发给家人以外的人。没有值得发的内容时，允许“今日休映”。
+              </aside>
+            </div>
+
+            <div class="today-grid">
+              <article class="feature-card" id="featureCard" aria-live="polite">
+                <div class="feature-topline">
+                  <span class="feature-label">NOW SCREENING</span>
+                  <span class="pill type-note" id="featureType">说明</span>
+                </div>
+                <h2 class="feature-title" id="featureTitle">放映厅今天开张</h2>
+                <p class="feature-summary" id="featureSummary">这里不是资讯瀑布，而是一间只为你放映的小厅。</p>
+                <div class="feature-foot">
+                  <div class="feature-source">
+                    <span id="featureSource">放映厅说明</span>
+                    <span id="featureDate"></span>
+                  </div>
+                  <a class="feature-link" id="featureLink" href="#" target="_blank" rel="noopener noreferrer" hidden>查看来源 ↗</a>
+                </div>
+              </article>
+
+              <aside class="today-side">
+                <div class="stat-board">
+                  <h3>放映厅档案</h3>
+                  <div class="stat-grid">
+                    <div class="stat-cell"><strong id="statRoles">0</strong><span>角色</span></div>
+                    <div class="stat-cell"><strong id="statWatched">0</strong><span>已看</span></div>
+                    <div class="stat-cell"><strong id="statNews">0</strong><span>片单条目</span></div>
+                    <div class="stat-cell"><strong id="statDiary">0</strong><span>场记</span></div>
+                  </div>
+                  <div class="progress-track" aria-hidden="true"><i id="roleProgressBar"></i></div>
+                  <p class="section-meta" id="roleProgressText">角色观看进度 0%</p>
+                </div>
+                <div class="official-box">
+                  <h3>官方资讯入口</h3>
+                  <a href="https://www.weibo.com/234720023" target="_blank" rel="noopener noreferrer">白鹿本人微博 <span>↗</span></a>
+                  <a href="https://www.weibo.com/u/7555511345" target="_blank" rel="noopener noreferrer">白鹿官方工作室 <span>↗</span></a>
+                  <a href="https://www.iqiyi.com/star/236210805" target="_blank" rel="noopener noreferrer">爱奇艺明星空间 <span>↗</span></a>
+                </div>
+              </aside>
+            </div>
+
+            <section class="news-section" aria-labelledby="newsTitle">
+              <div class="section-heading">
+                <div>
+                  <p class="section-kicker">THIS WEEK'S PROGRAM</p>
+                  <h2 id="newsTitle">本周片单</h2>
+                </div>
+                <p class="section-meta" id="newsMeta">还没有导入片单</p>
+              </div>
+              <div class="news-grid" id="newsGrid"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" data-view="roles" id="view-roles">
+          <div class="shell">
+            <header class="page-head">
+              <div>
+                <p class="section-kicker">ROLE UNIVERSE</p>
+                <h1>角色宇宙</h1>
+                <p>按年份和角色重看白鹿的作品。标记“已看”只保存在本机，不会同步到任何平台。</p>
+              </div>
+              <div class="progress-badge">
+                <strong id="roleProgress">0%</strong>
+                <span>角色观看进度</span>
+              </div>
+            </header>
+
+            <div class="filter-bar">
+              <div class="chip-row" id="roleFilters" role="group" aria-label="按观看状态筛选">
+                <button class="chip" type="button" data-status="all" aria-pressed="true">全部</button>
+                <button class="chip" type="button" data-status="unwatched" aria-pressed="false">还没看</button>
+                <button class="chip" type="button" data-status="watched" aria-pressed="false">已看</button>
+              </div>
+              <label class="sr-only" for="roleSearch">搜索作品或角色</label>
+              <input class="search-input" id="roleSearch" type="search" placeholder="搜索作品、角色、标签" />
+            </div>
+
+            <div class="role-grid" id="roleGrid"></div>
+          </div>
+        </section>
+
+        <section class="view" data-view="gallery" id="view-gallery">
+          <div class="shell">
+            <header class="page-head">
+              <div>
+                <p class="section-kicker">FILM ARCHIVE</p>
+                <h1>胶片仓库</h1>
+                <p>这里显示家人统一发布的照片和视频，打开链接就能看；页面内临时添加的文件只保存在当前设备。</p>
+              </div>
+            </header>
+
+            <div class="gallery-toolbar">
+              <div class="gallery-tabs" role="tablist" aria-label="媒体类型">
+                <button class="chip active" type="button" data-gallery="photos" aria-pressed="true">照片 <span id="photoCount">0</span></button>
+                <button class="chip" type="button" data-gallery="videos" aria-pressed="false">视频 <span id="videoCount">0</span></button>
+              </div>
+              <div class="settings-actions">
+                <button class="btn compact" id="addPhotoBtn" type="button">添加照片</button>
+                <button class="btn compact ghost" id="addVideoBtn" type="button">添加视频</button>
+              </div>
+            </div>
+
+            <div class="gallery-panel active" data-gallery-panel="photos">
+              <div class="media-grid" id="photoGrid"></div>
+            </div>
+            <div class="gallery-panel" data-gallery-panel="videos">
+              <div class="media-grid" id="videoGrid"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" data-view="quotes" id="view-quotes">
+          <div class="shell">
+            <header class="page-head">
+              <div>
+                <p class="section-kicker">WORDS TO KEEP</p>
+                <h1>鹿语邮局</h1>
+                <p>收藏公开台词、采访原话，或者你自己想留下的角色关键词。这里不做 AI 配音，也不伪造明星留言。</p>
+              </div>
+            </header>
+
+            <div class="quote-feature" id="quoteFeature">
+              <blockquote id="quoteFeatureText">重来一次，不做任人摆布的棋子。</blockquote>
+              <footer>
+                <span id="quoteFeatureMeta">角色关键词</span>
+                <button class="text-btn" id="quoteShuffleBtn" type="button">换一句</button>
+              </footer>
+            </div>
+
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">YOUR COLLECTION</p>
+                <h2>收藏的句子</h2>
+              </div>
+              <p class="section-meta" id="quoteMeta">0 句</p>
+            </div>
+            <div class="quote-grid" id="quoteGrid"></div>
+
+            <form class="quote-form" id="quoteForm" novalidate>
+              <h3>收藏一句</h3>
+              <div class="form-grid">
+                <label class="field wide">
+                  <span>内容 <b>必填</b></span>
+                  <textarea id="quoteText" rows="3" maxlength="240" required placeholder="写一句你真正想留下的台词、采访原话，或你自己的角色关键词。"></textarea>
+                  <em class="field-error" id="quoteTextError"></em>
+                </label>
+                <label class="field">
+                  <span>来源</span>
+                  <input id="quoteSource" maxlength="50" placeholder="如：角色关键词 / 采访" />
+                </label>
+                <label class="field">
+                  <span>类型</span>
+                  <select id="quoteKind">
+                    <option value="角色关键词">角色关键词</option>
+                    <option value="台词">台词</option>
+                    <option value="访谈">访谈</option>
+                    <option value="自己的话">自己的话</option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button class="btn" type="submit">放进邮局</button>
+              </div>
+              <p class="form-note">如果是公开台词或采访，请尽量写清来源；不确定来源的内容，标成“自己的话”。</p>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" data-view="diary" id="view-diary">
+          <div class="shell">
+            <header class="page-head">
+              <div>
+                <p class="section-kicker">OUR SHOOTING LOG</p>
+                <h1>我们的场记</h1>
+                <p>写下你看完一部戏、一段采访或一张照片之后的感觉。这里不评分，也不比较，只留下你自己的话。</p>
+              </div>
+            </header>
+
+            <div class="diary-layout">
+              <aside class="diary-form-panel">
+                <h2>写一场</h2>
+                <p>日期、心情、几句想说的话。可以附一张自己的照片。</p>
+                <form id="diaryForm" novalidate>
+                  <div class="form-grid">
+                    <label class="field">
+                      <span>日期</span>
+                      <input id="diaryDate" type="date" required />
+                    </label>
+                    <label class="field">
+                      <span>心情</span>
+                      <select id="diaryMood">
+                        <option value="期待">期待</option>
+                        <option value="开心">开心</option>
+                        <option value="感动">感动</option>
+                        <option value="平静">平静</option>
+                        <option value="想哭">想哭</option>
+                        <option value="元气">元气</option>
+                      </select>
+                    </label>
+                    <label class="field wide">
+                      <span>标题 <i>可选</i></span>
+                      <input id="diaryTitle" maxlength="60" placeholder="如：第一次看《宁安如梦》" />
+                    </label>
+                    <label class="field wide">
+                      <span>想说的话 <b>必填</b></span>
+                      <textarea id="diaryText" rows="6" maxlength="2000" required placeholder="今天看到了什么，想起了什么。"></textarea>
+                      <em class="field-error" id="diaryTextError"></em>
+                    </label>
+                    <label class="field wide">
+                      <span>附一张照片 <i>可选</i></span>
+                      <input id="diaryPhotoInput" type="file" accept="image/*" hidden />
+                      <button class="btn compact ghost" id="chooseDiaryPhotoBtn" type="button">选择本地照片</button>
+                      <button class="text-btn" id="removeDiaryPhotoBtn" type="button" hidden>移除照片</button>
+                      <img class="diary-photo" id="diaryPhotoPreview" alt="场记照片预览" hidden />
+                    </label>
+                  </div>
+                  <div class="form-actions">
+                    <button class="btn" type="submit">保存这场</button>
+                    <button class="btn ghost" id="resetDiaryBtn" type="reset">清空</button>
+                  </div>
+                </form>
+              </aside>
+
+              <section aria-labelledby="diaryListTitle">
+                <div class="section-heading">
+                  <div>
+                    <p class="section-kicker">LOG BOOK</p>
+                    <h2 id="diaryListTitle">场记本</h2>
+                  </div>
+                  <div class="settings-actions">
+                    <button class="btn compact ghost" id="printDiaryBtn" type="button">打印本月</button>
+                    <button class="btn compact ghost" id="exportAllBtnInline" type="button">导出全部</button>
+                  </div>
+                </div>
+                <div class="diary-list" id="diaryList"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div class="shell">
+          <span id="footerTicket">白鹿私人放映厅 · 第 0414 号观众</span>
+          <span>家庭私密链接 · 请勿转发 · 不做商业用途</span>
+        </div>
+      </footer>
+    </div>
+
+    <div class="intro-overlay" id="introOverlay">
+      <div class="intro-frame">
+        <div class="reel" id="introReelCode" aria-hidden="true">NO.1</div>
+        <p class="eyebrow">PRIVATE SCREENING · ADMIT ONE</p>
+        <h1>白鹿私人放映厅</h1>
+        <p class="intro-sub">这是一间只为你一个人开的放映厅。请输入家人留给你的场次号。</p>
+        <form class="ticket-form" id="ticketForm">
+          <label class="sr-only" for="ticketCode">场次号</label>
+          <input id="ticketCode" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="•••" />
+          <button type="submit">入场</button>
+        </form>
+        <p class="ticket-error" id="ticketError" role="alert"></p>
+        <p class="intro-foot" id="introFoot">仅限家人 · 请勿转发链接</p>
+      </div>
+    </div>
+
+    <div class="letter-stage is-hidden" id="letterStage">
+      <div class="letter-card">
+        <p class="eyebrow">LETTER FROM THE DIRECTOR</p>
+        <h2 id="letterTitle">写给你的一封信</h2>
+        <div class="letter-body" id="letterBody"></div>
+        <p class="letter-sign" id="letterSign">第 0414 号观众 · 首映日</p>
+        <div class="form-actions">
+          <button class="btn" id="enterCinemaBtn" type="button">推开放映厅的门</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop is-hidden" id="settingsModal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="settingsTitle">放映厅设置</h2>
+            <p>首映礼、数据与隐私。所有设置只保存在本机。</p>
+          </div>
+          <button class="icon-btn" id="closeSettingsBtn" type="button" aria-label="关闭设置">×</button>
+        </div>
+        <div class="modal-body">
+          <section class="settings-section">
+            <h3>首映礼</h3>
+            <p>可以改女儿的名字、票根场次号和那封信。改完后，票根上的场次号也要一致。</p>
+            <div class="form-grid">
+              <label class="field">
+                <span>观众称呼</span>
+                <input id="settingsName" maxlength="30" />
+              </label>
+              <label class="field">
+                <span>票根场次号</span>
+                <input id="settingsCode" maxlength="8" inputmode="numeric" />
+              </label>
+              <label class="field wide">
+                <span>信的标题</span>
+                <input id="settingsLetterTitle" maxlength="60" />
+              </label>
+              <label class="field wide">
+                <span>信的内容</span>
+                <textarea id="settingsLetterBody" rows="7" maxlength="1200"></textarea>
+              </label>
+            </div>
+            <div class="settings-actions" style="margin-top:12px">
+              <button class="btn compact" id="saveSettingsBtn" type="button">保存设置</button>
+              <button class="btn compact ghost" id="replayIntroBtn" type="button">重播首映礼</button>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h3>数据</h3>
+            <p>导出会包含片单、角色进度、鹿语、场记和本地照片；视频文件较大时请在胶片仓库里逐个下载，再交给发布工具。</p>
+            <div class="settings-actions">
+              <button class="btn compact" id="exportAllBtn" type="button">导出全部数据</button>
+              <button class="btn compact ghost" id="importBackupBtn" type="button">导入备份</button>
+              <button class="btn compact ghost" id="exportMediaBtn" type="button">导出媒体文件</button>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <h3>清空</h3>
+            <p>清空会删除本机保存的片单、进度、场记、照片和视频。操作前请先导出备份。</p>
+            <button class="btn danger compact" id="clearAllBtn" type="button">清空全部数据</button>
+          </section>
+
+          <section class="settings-section">
+            <h3>隐私说明</h3>
+            <p>这是一个家庭私密链接，不是商业产品，也不提供下载、售卖或二次分发。</p>
+            <ul class="privacy-list">
+              <li>打开链接需要场次号；页面托管在公网，但没有接入统计、广告或第三方追踪。</li>
+              <li>页面内新增的场记和媒体只保存在当前设备；要让所有设备都能看到，请用发布工具更新 media 文件夹。</li>
+              <li>请勿在页面里填写学校、住址、电话、身份证号等敏感信息。</li>
+              <li>资讯条目必须保留来源和日期；没有来源的内容不进入片单。</li>
+              <li>不使用 AI 换脸、声音克隆，不伪造“白鹿对你说”。</li>
+              <li>只使用官方公开物料或已获授权的素材；不下载代拍、私生、偷拍和付费墙内容。</li>
+              <li>如果要公开发布、售卖或做社群，必须先取得肖像权和著作权授权。</li>
+            </ul>
+          </section>
+        </div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="closeSettingsBtn2" type="button">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop is-hidden" id="confirmModal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="modal-head">
+          <div>
+            <h2 id="confirmTitle">确认</h2>
+            <p id="confirmText"></p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="confirmCancel" type="button">取消</button>
+          <button class="btn danger" id="confirmOk" type="button">确认</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lightbox is-hidden" id="lightbox">
+      <button id="lightboxClose" type="button" aria-label="关闭大图">×</button>
+      <img id="lightboxImage" alt="照片大图" />
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div id="printArea" class="print-area" aria-hidden="true"></div>
+
+    <input type="file" id="newsFileInput" accept=".json,application/json" hidden />
+    <input type="file" id="backupFileInput" accept=".json,application/json" hidden />
+    <input type="file" id="photoFileInput" accept="image/*" hidden />
+    <input type="file" id="videoFileInput" accept="video/*" hidden />
+
+    <noscript>这个放映厅需要浏览器启用 JavaScript。所有数据只在本地处理。</noscript>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
