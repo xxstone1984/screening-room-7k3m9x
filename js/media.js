@@ -917,57 +917,75 @@ export const MEDIA = {
     {
       "id": "video-0001",
       "name": "手忙脚乱中 [6a30f27d000000001003fa77]",
-      "src": "media/videos/%E6%89%8B%E5%BF%99%E8%84%9A%E4%B9%B1%E4%B8%AD%20%5B6a30f27d000000001003fa77%5D.mp4",
+      "src": "media/videos_web/%E6%89%8B%E5%BF%99%E8%84%9A%E4%B9%B1%E4%B8%AD%20%5B6a30f27d000000001003fa77%5D.mp4",
+      "poster": "media/video_posters/%E6%89%8B%E5%BF%99%E8%84%9A%E4%B9%B1%E4%B8%AD%20%5B6a30f27d000000001003fa77%5D.jpg",
+      "original": "media/videos/%E6%89%8B%E5%BF%99%E8%84%9A%E4%B9%B1%E4%B8%AD%20%5B6a30f27d000000001003fa77%5D.mp4",
       "caption": "手忙脚乱中 [6a30f27d000000001003fa77]"
     },
     {
       "id": "video-0002",
       "name": "打歌～₍˄·͈༝·͈˄＊₎◞ ̑̑ [6ac0a76a000000001803a9b9]",
-      "src": "media/videos/%E6%89%93%E6%AD%8C%EF%BD%9E%E2%82%8D%CB%84%C2%B7%CD%88%E0%BC%9D%C2%B7%CD%88%CB%84%EF%BC%8A%E2%82%8E%E2%97%9E%20%CC%91%CC%91%20%5B6ac0a76a000000001803a9b9%5D.mp4",
+      "src": "media/videos_web/%E6%89%93%E6%AD%8C%EF%BD%9E%E2%82%8D%CB%84%C2%B7%CD%88%E0%BC%9D%C2%B7%CD%88%CB%84%EF%BC%8A%E2%82%8E%E2%97%9E%20%CC%91%CC%91%20%5B6ac0a76a000000001803a9b9%5D.mp4",
+      "poster": "media/video_posters/%E6%89%93%E6%AD%8C%EF%BD%9E%E2%82%8D%CB%84%C2%B7%CD%88%E0%BC%9D%C2%B7%CD%88%CB%84%EF%BC%8A%E2%82%8E%E2%97%9E%20%CC%91%CC%91%20%5B6ac0a76a000000001803a9b9%5D.jpg",
+      "original": "media/videos/%E6%89%93%E6%AD%8C%EF%BD%9E%E2%82%8D%CB%84%C2%B7%CD%88%E0%BC%9D%C2%B7%CD%88%CB%84%EF%BC%8A%E2%82%8E%E2%97%9E%20%CC%91%CC%91%20%5B6ac0a76a000000001803a9b9%5D.mp4",
       "caption": "打歌～₍˄·͈༝·͈˄＊₎◞ ̑̑ [6ac0a76a000000001803a9b9]"
     },
     {
       "id": "video-0003",
       "name": "记🦌元宵宝藏美味 [699c31c40000000009038fc7]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E5%85%83%E5%AE%B5%E5%AE%9D%E8%97%8F%E7%BE%8E%E5%91%B3%20%5B699c31c40000000009038fc7%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E5%85%83%E5%AE%B5%E5%AE%9D%E8%97%8F%E7%BE%8E%E5%91%B3%20%5B699c31c40000000009038fc7%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E5%85%83%E5%AE%B5%E5%AE%9D%E8%97%8F%E7%BE%8E%E5%91%B3%20%5B699c31c40000000009038fc7%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E5%85%83%E5%AE%B5%E5%AE%9D%E8%97%8F%E7%BE%8E%E5%91%B3%20%5B699c31c40000000009038fc7%5D.mp4",
       "caption": "记🦌元宵宝藏美味 [699c31c40000000009038fc7]"
     },
     {
       "id": "video-0004",
       "name": "记🦌干爽自在的一日片场vlog [6ae70f9d000000001201c9b8]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E5%B9%B2%E7%88%BD%E8%87%AA%E5%9C%A8%E7%9A%84%E4%B8%80%E6%97%A5%E7%89%87%E5%9C%BAvlog%20%5B6ae70f9d000000001201c9b8%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E5%B9%B2%E7%88%BD%E8%87%AA%E5%9C%A8%E7%9A%84%E4%B8%80%E6%97%A5%E7%89%87%E5%9C%BAvlog%20%5B6ae70f9d000000001201c9b8%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E5%B9%B2%E7%88%BD%E8%87%AA%E5%9C%A8%E7%9A%84%E4%B8%80%E6%97%A5%E7%89%87%E5%9C%BAvlog%20%5B6ae70f9d000000001201c9b8%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E5%B9%B2%E7%88%BD%E8%87%AA%E5%9C%A8%E7%9A%84%E4%B8%80%E6%97%A5%E7%89%87%E5%9C%BAvlog%20%5B6ae70f9d000000001201c9b8%5D.mp4",
       "caption": "记🦌干爽自在的一日片场vlog [6ae70f9d000000001201c9b8]"
     },
     {
       "id": "video-0005",
       "name": "记🦌日常 [69c90ebf000000001d019d19]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B69c90ebf000000001d019d19%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B69c90ebf000000001d019d19%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B69c90ebf000000001d019d19%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B69c90ebf000000001d019d19%5D.mp4",
       "caption": "记🦌日常 [69c90ebf000000001d019d19]"
     },
     {
       "id": "video-0006",
       "name": "记🦌日常 [6aca085a0000000018039fff]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6aca085a0000000018039fff%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6aca085a0000000018039fff%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6aca085a0000000018039fff%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6aca085a0000000018039fff%5D.mp4",
       "caption": "记🦌日常 [6aca085a0000000018039fff]"
     },
     {
       "id": "video-0007",
       "name": "记🦌日常 [6ae5d180000000002600001a]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6ae5d180000000002600001a%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6ae5d180000000002600001a%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6ae5d180000000002600001a%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%97%A5%E5%B8%B8%20%5B6ae5d180000000002600001a%5D.mp4",
       "caption": "记🦌日常 [6ae5d180000000002600001a]"
     },
     {
       "id": "video-0008",
       "name": "记🦌气味 [69ff0a5e000000003503a110]",
-      "src": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%B0%94%E5%91%B3%20%5B69ff0a5e000000003503a110%5D.mp4",
+      "src": "media/videos_web/%E8%AE%B0%F0%9F%A6%8C%E6%B0%94%E5%91%B3%20%5B69ff0a5e000000003503a110%5D.mp4",
+      "poster": "media/video_posters/%E8%AE%B0%F0%9F%A6%8C%E6%B0%94%E5%91%B3%20%5B69ff0a5e000000003503a110%5D.jpg",
+      "original": "media/videos/%E8%AE%B0%F0%9F%A6%8C%E6%B0%94%E5%91%B3%20%5B69ff0a5e000000003503a110%5D.mp4",
       "caption": "记🦌气味 [69ff0a5e000000003503a110]"
     },
     {
       "id": "video-0009",
       "name": "送妈妈的母亲节礼物❣超大超爱她 [69f31a4d0000000035033845]",
-      "src": "media/videos/%E9%80%81%E5%A6%88%E5%A6%88%E7%9A%84%E6%AF%8D%E4%BA%B2%E8%8A%82%E7%A4%BC%E7%89%A9%E2%9D%A3%E8%B6%85%E5%A4%A7%E8%B6%85%E7%88%B1%E5%A5%B9%20%5B69f31a4d0000000035033845%5D.mp4",
+      "src": "media/videos_web/%E9%80%81%E5%A6%88%E5%A6%88%E7%9A%84%E6%AF%8D%E4%BA%B2%E8%8A%82%E7%A4%BC%E7%89%A9%E2%9D%A3%E8%B6%85%E5%A4%A7%E8%B6%85%E7%88%B1%E5%A5%B9%20%5B69f31a4d0000000035033845%5D.mp4",
+      "poster": "media/video_posters/%E9%80%81%E5%A6%88%E5%A6%88%E7%9A%84%E6%AF%8D%E4%BA%B2%E8%8A%82%E7%A4%BC%E7%89%A9%E2%9D%A3%E8%B6%85%E5%A4%A7%E8%B6%85%E7%88%B1%E5%A5%B9%20%5B69f31a4d0000000035033845%5D.jpg",
+      "original": "media/videos/%E9%80%81%E5%A6%88%E5%A6%88%E7%9A%84%E6%AF%8D%E4%BA%B2%E8%8A%82%E7%A4%BC%E7%89%A9%E2%9D%A3%E8%B6%85%E5%A4%A7%E8%B6%85%E7%88%B1%E5%A5%B9%20%5B69f31a4d0000000035033845%5D.mp4",
       "caption": "送妈妈的母亲节礼物❣超大超爱她 [69f31a4d0000000035033845]"
     }
   ],
-  "generatedAt": "2026-11-23T06:40:47.455893+00:00"
+  "generatedAt": "2026-11-23T06:45:30.011668+00:00"
 };

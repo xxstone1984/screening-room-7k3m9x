@@ -225,6 +225,8 @@ function allVideos() {
       id: video.id || `curated-${video.src}`,
       name: video.name || video.caption || "官方视频",
       src: video.src,
+      poster: video.poster || "",
+      original: video.original || video.src,
       curated: true,
       createdAt: video.createdAt || ""
     }));
@@ -517,18 +519,20 @@ function renderGallery() {
       const card = el("article", "media-card video");
       const node = document.createElement("video");
       node.dataset.src = video.src;
-      node.controls = true;
+      node.controls = false;
       node.preload = "none";
       node.playsInline = true;
       node.setAttribute("playsinline", "");
       node.setAttribute("webkit-playsinline", "");
       node.setAttribute("x5-playsinline", "");
+      node.poster = galleryTab === "videos" ? video.poster : "";
       const playBadge = el("span", "video-play-badge", "▶ 点击播放");
       const startVideo = () => {
         if (!node.src && node.dataset.src) {
           node.preload = "metadata";
           node.src = node.dataset.src;
           delete node.dataset.src;
+          node.controls = true;
           playBadge.remove();
           node.play().catch(() => {});
         }
