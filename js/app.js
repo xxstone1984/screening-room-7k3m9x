@@ -32,9 +32,9 @@ import {
   buildBackup,
   validateBackup,
   sanitizeFilename
-} from "./core.js?v=86625895b422";
-import { SEED, OFFICIAL_SOURCES } from "./seed.js?v=86625895b422";
-import { MEDIA } from "./media.js?v=86625895b422";
+} from "./core.js?v=bbe5e63c041f";
+import { SEED, OFFICIAL_SOURCES } from "./seed.js?v=bbe5e63c041f";
+import { MEDIA } from "./media.js?v=bbe5e63c041f";
 import {
   getAll,
   put,
@@ -45,7 +45,7 @@ import {
   downloadBlob,
   downloadJSON,
   downloadDataUrl
-} from "./storage.js?v=86625895b422";
+} from "./storage.js?v=bbe5e63c041f";
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABELS = {
@@ -459,36 +459,54 @@ function renderOfficialSources() {
   const box = $("officialBox");
   if (!box) return;
   clearNode(box);
-  box.append(el("h3", "", "官方资讯入口"));
+  box.append(el("h3", "", "白鹿网页入口"));
   box.append(
     el(
       "p",
       "official-hint",
       isWeChat()
-        ? "微信里打不开时，点「复制」，再到对应 App 里粘贴或搜索。"
-        : "点开是各平台官方主页；打不开时点「复制」。"
+        ? "以下入口优先在微信内查看；若平台仍要求打开 App，点「复制」后用手机浏览器粘贴。"
+        : "以下入口优先使用网页版；打不开时点「复制」到浏览器打开。"
     )
   );
-  for (const source of OFFICIAL_SOURCES) {
-    const row = el("div", "official-row");
-    const link = el("a", "official-link");
-    link.href = source.url;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    const copy = el("span", "official-copy");
-    copy.append(el("span", "official-platform", source.platform));
-    const titleRow = el("span", "official-title");
-    titleRow.append(el("strong", "official-label", source.label));
-    if (source.verified) titleRow.append(el("em", "official-verified", "已认证"));
-    copy.append(titleRow);
-    copy.append(el("span", "official-note", source.note));
-    link.append(copy, el("span", "official-arrow", "↗"));
-    const button = el("button", "official-copy-btn", "复制");
-    button.type = "button";
-    button.dataset.copySource = source.id;
-    button.setAttribute("aria-label", `复制${source.platform}${source.label}的链接或账号`);
-    row.append(link, button);
-    box.append(row);
+  const groups = [
+    { id: "official", label: "官方更新", note: "本人与工作室" },
+    { id: "works", label: "作品资料", note: "平台主页与数据库" },
+    { id: "community", label: "粉丝社区", note: "非官方内容" }
+  ];
+  for (const group of groups) {
+    const sources = OFFICIAL_SOURCES.filter((source) => source.group === group.id);
+    if (!sources.length) continue;
+    const section = el("section", "official-group");
+    const head = el("h4", "official-group-head");
+    head.append(el("strong", "", group.label), el("span", "", group.note));
+    section.append(head);
+    for (const source of sources) {
+      const row = el("div", "official-row");
+      const link = el("a", "official-link");
+      link.href = source.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const copy = el("span", "official-copy");
+      copy.append(el("span", "official-platform", source.platform));
+      const titleRow = el("span", "official-title");
+      titleRow.append(el("strong", "official-label", source.label));
+      if (source.badge) {
+        titleRow.append(
+          el("em", `official-badge is-${source.badgeKind || "platform"}`, source.badge)
+        );
+      }
+      copy.append(titleRow);
+      copy.append(el("span", "official-note", source.note));
+      link.append(copy, el("span", "official-arrow", "↗"));
+      const button = el("button", "official-copy-btn", "复制");
+      button.type = "button";
+      button.dataset.copySource = source.id;
+      button.setAttribute("aria-label", `复制${source.platform}${source.label}的链接`);
+      row.append(link, button);
+      section.append(row);
+    }
+    box.append(section);
   }
 }
 
@@ -643,7 +661,7 @@ function renderRoles() {
     actions.append(button);
     const source = normalizeUrl(role.source);
     if (source) {
-      const link = el("a", "role-source", "作品资料 ↗");
+      const link = el("a", "role-source", "作品年表 ↗");
       link.href = source;
       link.target = "_blank";
       link.rel = "noopener noreferrer";

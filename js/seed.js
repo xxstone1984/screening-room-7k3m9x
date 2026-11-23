@@ -1,63 +1,75 @@
 export const OFFICIAL_SOURCES = Object.freeze([
   {
     id: "weibo-bailu",
+    group: "official",
     platform: "微博",
     label: "白鹿my",
-    note: "本人微博 · 3100万粉丝",
-    url: "https://weibo.com/u/2616380702",
-    copy: "https://weibo.com/u/2616380702",
+    note: "本人微博 · 最新动态",
+    badge: "已认证",
+    badgeKind: "verified",
+    url: "https://m.weibo.cn/u/2616380702",
+    copy: "https://m.weibo.cn/u/2616380702",
     copyKind: "url",
-    verified: true
   },
   {
     id: "weibo-studio",
+    group: "official",
     platform: "微博",
     label: "白鹿官方工作室",
-    note: "工作室物料与行程",
-    url: "https://weibo.com/u/7555511345",
-    copy: "https://weibo.com/u/7555511345",
+    note: "工作室物料 · 更新较少",
+    badge: "已认证",
+    badgeKind: "verified",
+    url: "https://m.weibo.cn/u/7555511345",
+    copy: "https://m.weibo.cn/u/7555511345",
     copyKind: "url",
-    verified: true
   },
   {
-    id: "douyin-bailu",
-    platform: "抖音",
-    label: "白鹿my",
-    note: "抖音号 bmybailublue",
-    url: "https://www.douyin.com/user/MS4wLjABAAAAORCDztC7TcHbBDZ4e6JwLx6CfMzl-OIOLx6YKrcIA-U",
-    copy: "bmybailublue",
-    copyKind: "id",
-    verified: false
+    id: "mango-bailu",
+    group: "works",
+    platform: "芒果TV",
+    label: "白鹿明星页",
+    note: "简介 · 11 部作品",
+    badge: "平台页",
+    badgeKind: "platform",
+    url: "https://so.mgtv.com/star?id=939165&lastp=so_result",
+    copy: "https://so.mgtv.com/star?id=939165&lastp=so_result",
+    copyKind: "url"
   },
   {
-    id: "xiaohongshu-bailu",
-    platform: "小红书",
-    label: "白鹿",
-    note: "小红书号 Deer_923",
-    url: "https://www.xiaohongshu.com/search_result?keyword=Deer_923&type=51",
-    copy: "Deer_923",
-    copyKind: "id",
-    verified: false
+    id: "tencent-bailu",
+    group: "works",
+    platform: "腾讯视频",
+    label: "白鹿作品页",
+    note: "56 部作品 · 剧集与综艺",
+    badge: "平台页",
+    badgeKind: "platform",
+    url: "https://v.qq.com/x/search/?q=%E7%99%BD%E9%B9%BF",
+    copy: "https://v.qq.com/x/search/?q=%E7%99%BD%E9%B9%BF",
+    copyKind: "url"
   },
   {
-    id: "bilibili-bailu",
-    platform: "B站",
-    label: "白鹿my",
-    note: "B站认证：演员白鹿",
-    url: "https://space.bilibili.com/346469454",
-    copy: "https://space.bilibili.com/346469454",
+    id: "douban-bailu",
+    group: "works",
+    platform: "豆瓣",
+    label: "白鹿人物页",
+    note: "57 部影视 · 简介与相册",
+    badge: "资料库",
+    badgeKind: "platform",
+    url: "https://m.douban.com/personage/27579999/",
+    copy: "https://m.douban.com/personage/27579999/",
+    copyKind: "url"
+  },
+  {
+    id: "weibo-topic",
+    group: "community",
+    platform: "微博",
+    label: "白鹿超话",
+    note: "帖子 · 视频 · 签到",
+    badge: "粉丝社区",
+    badgeKind: "community",
+    url: "https://weibo.com/p/10080831263476b143b812a7768373fa708319?k=%E7%99%BD%E9%B9%BF&forward_name=pageinfo",
+    copy: "https://weibo.com/p/10080831263476b143b812a7768373fa708319?k=%E7%99%BD%E9%B9%BF&forward_name=pageinfo",
     copyKind: "url",
-    verified: true
-  },
-  {
-    id: "iqiyi-bailu",
-    platform: "爱奇艺",
-    label: "白鹿明星空间",
-    note: "作品与角色资料",
-    url: "https://www.iqiyi.com/star/236210805",
-    copy: "https://www.iqiyi.com/star/236210805",
-    copyKind: "url",
-    verified: true
   }
 ]);
 
@@ -99,7 +111,7 @@ export const SEED = {
       title: "白鹿本人微博",
       summary: "第一手动态的优先核对入口。只把它当作来源，不把未经证实的营销号内容放进片单。",
       source: "白鹿my",
-      url: "https://weibo.com/u/2616380702",
+      url: "https://m.weibo.cn/u/2616380702",
       type: "source",
       verified: true,
       featured: false
@@ -110,20 +122,20 @@ export const SEED = {
       title: "白鹿官方工作室",
       summary: "工作室发布的图片、视频和行程物料，适合进入“今日放映”和“胶片仓库”。",
       source: "白鹿官方工作室",
-      url: "https://www.weibo.com/u/7555511345",
+      url: "https://m.weibo.cn/u/7555511345",
       type: "source",
       verified: true,
       featured: false
     },
     {
-      id: "source-iqiyi",
+      id: "source-douban",
       date: "2026-11-23",
-      title: "爱奇艺明星空间",
-      summary: "作品和角色资料的核对入口。角色宇宙里的作品信息，以平台官方页面为准。",
-      source: "爱奇艺",
-      url: "https://www.iqiyi.com/star/236210805",
+      title: "豆瓣人物页",
+      summary: "作品年表、评分和相册的核对入口；适合查作品，不作为官方消息来源。",
+      source: "豆瓣",
+      url: "https://m.douban.com/personage/27579999/",
       type: "source",
-      verified: true,
+      verified: false,
       featured: false
     }
   ],
@@ -136,7 +148,7 @@ export const SEED = {
       tagline: "招摇过市，也从不低头。",
       description: "从被封禁的门派到重新夺回名字，路招摇的锋利和任性，是白鹿早期很有辨识度的一次亮相。",
       tags: ["古装", "仙侠", "成长"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-liehuo",
@@ -146,7 +158,7 @@ export const SEED = {
       tagline: "替兄从军，把名字藏在军装里。",
       description: "女扮男装进入军校，在训练和任务里一点点证明自己。热血、群像、少年气，是这部戏的关键词。",
       tags: ["年代", "热血", "群像"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-banshi",
@@ -156,7 +168,7 @@ export const SEED = {
       tagline: "在投行里，温柔也可以是一种锋芒。",
       description: "投行职场与旧日重逢交织，江君的成长线清楚：把委屈咽下去，把专业拿出来。",
       tags: ["都市", "职场", "爱情"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-zhousheng",
@@ -166,7 +178,7 @@ export const SEED = {
       tagline: "一生只等一个人。",
       description: "名门之女与将军的故事，克制、隐忍、后劲很长。漼时宜的安静，不等于没有力量。",
       tags: ["古装", "虐恋", "群像"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-yisheng",
@@ -176,7 +188,7 @@ export const SEED = {
       tagline: "把前世没说完的话，慢慢说完。",
       description: "现代篇里的时宜是配音演员，温柔、清醒，也更主动。和周生如故连起来看，会有另一种完整感。",
       tags: ["都市", "爱情", "治愈"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-jingcha",
@@ -186,7 +198,7 @@ export const SEED = {
       tagline: "从见习警员开始，把理想落到地面。",
       description: "没有开挂的主角光环，只有派出所里的琐碎、委屈和成长。夏洁线很适合慢慢看。",
       tags: ["现实", "职场", "群像"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-changyue",
@@ -196,7 +208,7 @@ export const SEED = {
       tagline: "穿过三世，仍要改写宿命。",
       description: "仙侠世界里的三重身份，情感线和命运线都很重。适合按角色分段重看。",
       tags: ["仙侠", "宿命", "三重身份"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     },
     {
       id: "role-ningan",
@@ -206,7 +218,7 @@ export const SEED = {
       tagline: "重来一次，不做任人摆布的棋子。",
       description: "重生、权谋、选择。姜雪宁的看点不是“赢”，而是知道结局以后，仍然要重新做一次人。",
       tags: ["古装", "权谋", "重生"],
-      source: "https://www.iqiyi.com/star/236210805"
+      source: "https://m.douban.com/personage/27579999/"
     }
   ],
   quotes: [
