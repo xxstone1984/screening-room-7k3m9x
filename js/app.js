@@ -205,6 +205,7 @@ function allPhotos() {
       id: photo.id || `curated-${photo.src}`,
       name: photo.name || photo.caption || "官方照片",
       src: photo.src,
+      thumb: photo.thumb || photo.src,
       curated: true,
       createdAt: photo.createdAt || ""
     }));
@@ -461,7 +462,8 @@ function renderGallery() {
       const card = el("article", "media-card photo");
       const image = document.createElement("img");
       image.alt = photo.name || "照片";
-      registerPhotoElement(image, photo.src, index < PHOTO_EAGER_COUNT || !photo.curated);
+      image.fetchPriority = index < 4 ? "high" : "auto";
+      registerPhotoElement(image, photo.thumb || photo.src, index < PHOTO_EAGER_COUNT || !photo.curated);
       image.addEventListener("click", () => openLightbox(photo.src, photo.name));
       image.addEventListener("error", () => {
         image.replaceWith(el("div", "media-placeholder", "照片文件未找到\n请检查 media/photos"));
