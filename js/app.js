@@ -32,9 +32,9 @@ import {
   buildBackup,
   validateBackup,
   sanitizeFilename
-} from "./core.js";
-import { SEED, OFFICIAL_SOURCES } from "./seed.js";
-import { MEDIA } from "./media.js";
+} from "./core.js?v=86625895b422";
+import { SEED, OFFICIAL_SOURCES } from "./seed.js?v=86625895b422";
+import { MEDIA } from "./media.js?v=86625895b422";
 import {
   getAll,
   put,
@@ -45,7 +45,7 @@ import {
   downloadBlob,
   downloadJSON,
   downloadDataUrl
-} from "./storage.js";
+} from "./storage.js?v=86625895b422";
 
 const $ = (id) => document.getElementById(id);
 const TYPE_LABELS = {
