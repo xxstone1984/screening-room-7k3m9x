@@ -527,15 +527,22 @@ function renderGallery() {
       node.setAttribute("x5-playsinline", "");
       node.poster = galleryTab === "videos" ? video.poster : "";
       const playBadge = el("span", "video-play-badge", "▶ 点击播放");
-      const startVideo = () => {
-        if (!node.src && node.dataset.src) {
-          node.preload = "metadata";
-          node.src = node.dataset.src;
-          delete node.dataset.src;
-          node.controls = true;
-          playBadge.remove();
-          node.play().catch(() => {});
+      const startVideo = async () => {
+        if (node.src || !node.dataset.src) return;
+        const source = node.dataset.src;
+        delete node.dataset.src;
+        node.controls = true;
+        playBadge.textContent = "正在加载…";
+        try {
+          const response = await fetch(source);
+          if (!response.ok) throw new Error(`视频加载失败：${response.status}`);
+          const blob = await response.blob();
+          node.src = URL.createObjectURL(blob);
+        } catch {
+          node.src = source;
         }
+        playBadge.remove();
+        node.play().catch(() => {});
       };
       node.addEventListener("click", startVideo);
       node.setAttribute("aria-label", video.name || "视频");
