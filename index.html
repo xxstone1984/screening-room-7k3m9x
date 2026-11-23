@@ -52,6 +52,7 @@
                 <div class="hero-actions">
                   <button class="btn" id="shuffleBtn" type="button">换一张片单</button>
                   <button class="btn ghost" id="openUpdateBtn" type="button">导入本周片单</button>
+                  <button class="btn ghost" id="openLineupBtn" type="button">我的片单</button>
                 </div>
               </div>
               <aside class="hero-note">
@@ -90,11 +91,8 @@
                   <div class="progress-track" aria-hidden="true"><i id="roleProgressBar"></i></div>
                   <p class="section-meta" id="roleProgressText">角色观看进度 0%</p>
                 </div>
-                <div class="official-box">
+                <div class="official-box" id="officialBox" aria-label="各平台官方主页入口">
                   <h3>官方资讯入口</h3>
-                  <a href="https://www.weibo.com/234720023" target="_blank" rel="noopener noreferrer">白鹿本人微博 <span>↗</span></a>
-                  <a href="https://www.weibo.com/u/7555511345" target="_blank" rel="noopener noreferrer">白鹿官方工作室 <span>↗</span></a>
-                  <a href="https://www.iqiyi.com/star/236210805" target="_blank" rel="noopener noreferrer">爱奇艺明星空间 <span>↗</span></a>
                 </div>
               </aside>
             </div>
@@ -108,6 +106,30 @@
                 <p class="section-meta" id="newsMeta">还没有导入片单</p>
               </div>
               <div class="news-grid" id="newsGrid"></div>
+            </section>
+
+            <section class="my-lineup-section" id="myLineupSection" aria-labelledby="myLineupTitle">
+              <div class="section-heading">
+                <div>
+                  <p class="section-kicker">MY WEEKLY PICKS</p>
+                  <h2 id="myLineupTitle">我的本周片单</h2>
+                </div>
+                <p class="section-meta" id="myLineupMeta">0 条 · 只保存在这台设备</p>
+              </div>
+              <p class="lineup-intro">
+                看到喜欢的照片或视频，点「＋片单」就会收进这里。这份片单只存在她自己的手机里，不会上传，也不会改到家人的公网片单。
+              </p>
+              <div class="lineup-actions">
+                <button class="btn compact" id="lineupPhotoBtn" type="button">上传照片</button>
+                <button class="btn compact ghost" id="lineupVideoBtn" type="button">上传视频</button>
+                <button class="btn compact ghost" id="exportLineupBtn" type="button">导出我的片单</button>
+                <button class="btn compact ghost" id="importLineupBtn" type="button">导入片单文件</button>
+              </div>
+              <div class="recent-strip-wrap" id="recentStripWrap" hidden>
+                <h3>最近看过 · 点＋收进片单</h3>
+                <div class="recent-strip" id="recentStrip"></div>
+              </div>
+              <div class="lineup-grid" id="myLineupGrid"></div>
             </section>
           </div>
         </section>
@@ -427,6 +449,11 @@
     <div class="lightbox is-hidden" id="lightbox">
       <button id="lightboxClose" type="button" aria-label="关闭大图">×</button>
       <img id="lightboxImage" alt="照片大图" />
+      <video id="lightboxVideo" controls playsinline hidden></video>
+      <div class="lightbox-bar" id="lightboxBar">
+        <span id="lightboxTitle"></span>
+        <button class="btn compact" id="lightboxLineupBtn" type="button">＋ 加入本周片单</button>
+      </div>
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -436,6 +463,9 @@
     <input type="file" id="backupFileInput" accept=".json,application/json" hidden />
     <input type="file" id="photoFileInput" accept="image/*" hidden />
     <input type="file" id="videoFileInput" accept="video/*" hidden />
+    <input type="file" id="lineupPhotoInput" accept="image/*" hidden />
+    <input type="file" id="lineupVideoInput" accept="video/*" hidden />
+    <input type="file" id="lineupFileInput" accept=".json,application/json" hidden />
 
     <noscript>这个放映厅需要浏览器启用 JavaScript。所有数据只在本地处理。</noscript>
     <script type="module" src="js/app.js"></script>

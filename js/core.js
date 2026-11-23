@@ -4,9 +4,12 @@ export const DEFAULT_TICKET_CODE = "0414";
 export const MAX_NEWS = 120;
 export const MAX_DIARY = 500;
 export const MAX_QUOTES = 200;
+export const MAX_LINEUP = 50;
+export const MAX_RECENT_MEDIA = 24;
 export const MAX_PHOTO_DATA_LENGTH = 900000;
 export const NEWS_TYPES = Object.freeze(["official", "work", "event", "media", "source", "note"]);
 export const MOODS = Object.freeze(["期待", "开心", "感动", "平静", "想哭", "元气"]);
+export const LINEUP_KINDS = Object.freeze(["photo", "video"]);
 export const ROOMS = Object.freeze([
   { id: "today", label: "今日放映", kicker: "TODAY" },
   { id: "roles", label: "角色宇宙", kicker: "ROLES" },
@@ -165,6 +168,96 @@ export function validateNewsPack(payload) {
     week: singleLine(payload.week) || getWeekLabel(),
     generatedAt: singleLine(payload.generatedAt),
     items
+  };
+}
+
+export function normalizeLineupItem(input = {}, now = new Date()) {
+  const kind = LINEUP_KINDS.includes(input.kind) ? input.kind : "photo";
+  return {
+    id: singleLine(input.id) || createId("lineup", now),
+    kind,
+    ref: singleLine(input.ref).slice(0, 400),
+    name: singleLine(input.name).slice(0, 80) || (kind === "video" ? "视频" : "照片"),
+    src: singleLine(input.src).slice(0, 400),
+    addedAt: singleLine(input.addedAt) || new Date(now).toISOString()
+  };
+}
+
+export function lineupKey(item = {}) {
+  return `${item.kind === "video" ? "video" : "photo"}:${singleLine(item.ref) || singleLine(item.src)}`;
+}
+
+export function validateLineupItem(item) {
+  const errors = {};
+  if (!LINEUP_KINDS.includes(item.kind)) errors.kind = "类型只能是照片或视频";
+  if (charLength(item.name) < 1) errors.name = "缺少标题";
+  if (charLength(item.name) > 80) errors.name = "标题不能超过 80 字";
+  if (!singleLine(item.ref) && !singleLine(item.src)) errors.ref = "缺少媒体标识";
+  return errors;
+}
+
+export function mergeLineup(existing = [], incoming = [], now = new Date()) {
+  const map = new Map();
+  for (const value of existing) {
+    const item = normalizeLineupItem(value, now);
+    if (!Object.keys(validateLineupItem(item)).length) map.set(lineupKey(item), item);
+  }
+  for (const value of incoming) {
+    const item = normalizeLineupItem(value, now);
+    if (Object.keys(validateLineupItem(item)).length) continue;
+    const key = lineupKey(item);
+    if (!map.has(key)) map.set(key, item);
+  }
+  return [...map.values()].slice(0, MAX_LINEUP);
+}
+
+export function validateLineupPack(payload) {
+  if (!payload || typeof payload !== "object") return { ok: false, error: "片单文件不是有效对象" };
+  if (payload.kind !== "my-lineup") return { ok: false, error: "不是「我的本周片单」文件" };
+  if (!Array.isArray(payload.items)) return { ok: false, error: "片单文件缺少 items 数组" };
+  if (payload.items.length > MAX_LINEUP) return { ok: false, error: `一次最多导入 ${MAX_LINEUP} 条` };
+  const items = [];
+  for (const [index, raw] of payload.items.entries()) {
+    const source = raw && typeof raw === "object" ? raw : {};
+    const item = normalizeLineupItem(source);
+    if (!singleLine(item.ref) && !singleLine(item.src)) item.ref = "imported";
+    const errors = validateLineupItem(item);
+    if (Object.keys(errors).length) {
+      return { ok: false, error: `第 ${index + 1} 条：${Object.values(errors)[0]}` };
+    }
+    const dataUrl = typeof source.dataUrl === "string" ? source.dataUrl.trim() : "";
+    if (dataUrl) {
+      if (charLength(dataUrl) > MAX_PHOTO_DATA_LENGTH) {
+        return { ok: false, error: `第 ${index + 1} 条：照片太大` };
+      }
+      if (!PHOTO_PATTERN.test(dataUrl)) {
+        return { ok: false, error: `第 ${index + 1} 条：照片格式不支持` };
+      }
+    }
+    items.push({ ...item, dataUrl, localOnly: Boolean(source.localOnly) });
+  }
+  return { ok: true, items };
+}
+
+export function buildLineupPack(items = [], meta = {}, now = new Date()) {
+  return {
+    app: "白鹿放映厅",
+    kind: "my-lineup",
+    version: 1,
+    exportedAt: new Date(now).toISOString(),
+    ticketCode: singleLine(meta.ticketCode).slice(0, 8),
+    items: items.slice(0, MAX_LINEUP)
+  };
+}
+
+export function normalizeRecentMedia(input = {}) {
+  const kind = LINEUP_KINDS.includes(input.kind) ? input.kind : "";
+  const ref = singleLine(input.ref).slice(0, 400);
+  if (!kind || !ref) return null;
+  return {
+    kind,
+    ref,
+    at: singleLine(input.at) || new Date().toISOString()
   };
 }
 

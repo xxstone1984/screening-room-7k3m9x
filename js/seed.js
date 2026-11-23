@@ -1,3 +1,66 @@
+export const OFFICIAL_SOURCES = Object.freeze([
+  {
+    id: "weibo-bailu",
+    platform: "微博",
+    label: "白鹿my",
+    note: "本人微博 · 3100万粉丝",
+    url: "https://weibo.com/u/2616380702",
+    copy: "https://weibo.com/u/2616380702",
+    copyKind: "url",
+    verified: true
+  },
+  {
+    id: "weibo-studio",
+    platform: "微博",
+    label: "白鹿官方工作室",
+    note: "工作室物料与行程",
+    url: "https://weibo.com/u/7555511345",
+    copy: "https://weibo.com/u/7555511345",
+    copyKind: "url",
+    verified: true
+  },
+  {
+    id: "douyin-bailu",
+    platform: "抖音",
+    label: "白鹿my",
+    note: "抖音号 bmybailublue",
+    url: "https://www.douyin.com/user/MS4wLjABAAAAORCDztC7TcHbBDZ4e6JwLx6CfMzl-OIOLx6YKrcIA-U",
+    copy: "bmybailublue",
+    copyKind: "id",
+    verified: false
+  },
+  {
+    id: "xiaohongshu-bailu",
+    platform: "小红书",
+    label: "白鹿",
+    note: "小红书号 Deer_923",
+    url: "https://www.xiaohongshu.com/search_result?keyword=Deer_923&type=51",
+    copy: "Deer_923",
+    copyKind: "id",
+    verified: false
+  },
+  {
+    id: "bilibili-bailu",
+    platform: "B站",
+    label: "白鹿my",
+    note: "B站认证：演员白鹿",
+    url: "https://space.bilibili.com/346469454",
+    copy: "https://space.bilibili.com/346469454",
+    copyKind: "url",
+    verified: true
+  },
+  {
+    id: "iqiyi-bailu",
+    platform: "爱奇艺",
+    label: "白鹿明星空间",
+    note: "作品与角色资料",
+    url: "https://www.iqiyi.com/star/236210805",
+    copy: "https://www.iqiyi.com/star/236210805",
+    copyKind: "url",
+    verified: true
+  }
+]);
+
 export const SEED = {
   version: 1,
   unlocked: false,
@@ -36,7 +99,7 @@ export const SEED = {
       title: "白鹿本人微博",
       summary: "第一手动态的优先核对入口。只把它当作来源，不把未经证实的营销号内容放进片单。",
       source: "白鹿my",
-      url: "https://www.weibo.com/234720023",
+      url: "https://weibo.com/u/2616380702",
       type: "source",
       verified: true,
       featured: false

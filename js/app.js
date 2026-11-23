@@ -1,6 +1,8 @@
 import {
   STORAGE_KEY,
   DEFAULT_TICKET_CODE,
+  MAX_LINEUP,
+  MAX_RECENT_MEDIA,
   MAX_PHOTO_DATA_LENGTH,
   MOODS,
   ROOMS,
@@ -13,6 +15,12 @@ import {
   normalizeUrl,
   mergeNews,
   validateNewsPack,
+  normalizeLineupItem,
+  lineupKey,
+  mergeLineup,
+  validateLineupPack,
+  buildLineupPack,
+  normalizeRecentMedia,
   pickDailyCard,
   filterRoles,
   computeStats,
@@ -25,7 +33,7 @@ import {
   validateBackup,
   sanitizeFilename
 } from "./core.js";
-import { SEED } from "./seed.js";
+import { SEED, OFFICIAL_SOURCES } from "./seed.js";
 import { MEDIA } from "./media.js";
 import {
   getAll,
@@ -59,6 +67,9 @@ let roleQuery = "";
 let galleryTab = "photos";
 let diaryPhotoData = "";
 let confirmResolver = null;
+let lightboxMedia = null;
+let lightboxBlobUrl = "";
+let recentMediaCache = [];
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -77,6 +88,12 @@ function normalizeState(raw) {
     quotes: Array.isArray(value.quotes) ? value.quotes : base.quotes,
     diary: Array.isArray(value.diary) ? value.diary : base.diary,
     watched: Array.isArray(value.watched) ? [...new Set(value.watched)] : [],
+    myLineup: Array.isArray(value.myLineup)
+      ? mergeLineup([], value.myLineup)
+      : [],
+    recentMedia: Array.isArray(value.recentMedia)
+      ? value.recentMedia.map(normalizeRecentMedia).filter(Boolean).slice(0, MAX_RECENT_MEDIA)
+      : [],
     favorites: {
       quotes: [],
       photos: [],
@@ -93,10 +110,10 @@ function normalizeState(raw) {
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return clone(SEED);
+    if (!raw) return normalizeState(clone(SEED));
     return normalizeState(JSON.parse(raw));
   } catch {
-    return clone(SEED);
+    return normalizeState(clone(SEED));
   }
 }
 
@@ -141,6 +158,119 @@ function toast(message) {
   node.classList.add("show");
   clearTimeout(toast.timer);
   toast.timer = setTimeout(() => node.classList.remove("show"), 2600);
+}
+
+function isWeChat() {
+  return /MicroMessenger/i.test(navigator.userAgent);
+}
+
+async function copyText(value) {
+  const content = String(value || "").trim();
+  if (!content) return false;
+  try {
+    await navigator.clipboard.writeText(content);
+    return true;
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = content;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    area.remove();
+    return ok;
+  }
+}
+
+function mediaDescriptor(kind, item) {
+  if (!item) return null;
+  const curated = Boolean(item.curated);
+  const ref = curated ? String(item.src || "") : String(item.id || "");
+  if (!ref) return null;
+  return {
+    kind,
+    ref,
+    name: item.name || (kind === "video" ? "视频" : "照片"),
+    src: String(item.src || ""),
+    curated
+  };
+}
+
+function isInLineup(kind, ref) {
+  return state.myLineup.some((entry) => entry.kind === kind && entry.ref === ref);
+}
+
+function addToLineup(descriptor) {
+  if (!descriptor?.ref) return false;
+  if (isInLineup(descriptor.kind, descriptor.ref)) {
+    toast("已经在本周片单里了");
+    return false;
+  }
+  state.myLineup.unshift(
+    normalizeLineupItem({
+      kind: descriptor.kind,
+      ref: descriptor.ref,
+      name: descriptor.name,
+      src: descriptor.curated ? descriptor.src : ""
+    })
+  );
+  state.myLineup = state.myLineup.slice(0, MAX_LINEUP);
+  saveState();
+  renderMyLineup();
+  toast("已收进我的本周片单");
+  return true;
+}
+
+function rememberRecent(kind, ref) {
+  const item = normalizeRecentMedia({ kind, ref });
+  if (!item) return;
+  state.recentMedia = [
+    item,
+    ...state.recentMedia.filter((entry) => !(entry.kind === item.kind && entry.ref === item.ref))
+  ].slice(0, MAX_RECENT_MEDIA);
+  saveState();
+  renderRecentStrip();
+}
+
+function resolveLineupEntry(entry) {
+  if (entry.kind === "photo") {
+    const found = allPhotos().find((photo) => (photo.curated ? photo.src === entry.ref : photo.id === entry.ref));
+    return { entry, media: found, available: Boolean(found) };
+  }
+  const found = allVideos().find((video) => (video.curated ? video.src === entry.ref : video.id === entry.ref));
+  return { entry, media: found, available: Boolean(found) };
+}
+
+function openResolvedMedia(kind, item) {
+  const descriptor = mediaDescriptor(kind, item);
+  openLightbox(item.src, item.name, descriptor);
+}
+
+async function attachVideoSource(node, source) {
+  if (!source) return false;
+  if (source.startsWith("blob:")) {
+    node.src = source;
+    return true;
+  }
+  try {
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`视频加载失败：${response.status}`);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    node.src = url;
+    if (node.id === "lightboxVideo") lightboxBlobUrl = url;
+    return true;
+  } catch {
+    node.src = source;
+    return false;
+  }
 }
 
 function showApp() {
@@ -325,6 +455,150 @@ function renderNews() {
   }
 }
 
+function renderOfficialSources() {
+  const box = $("officialBox");
+  if (!box) return;
+  clearNode(box);
+  box.append(el("h3", "", "官方资讯入口"));
+  box.append(
+    el(
+      "p",
+      "official-hint",
+      isWeChat()
+        ? "微信里打不开时，点「复制」，再到对应 App 里粘贴或搜索。"
+        : "点开是各平台官方主页；打不开时点「复制」。"
+    )
+  );
+  for (const source of OFFICIAL_SOURCES) {
+    const row = el("div", "official-row");
+    const link = el("a", "official-link");
+    link.href = source.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    const copy = el("span", "official-copy");
+    copy.append(el("span", "official-platform", source.platform));
+    const titleRow = el("span", "official-title");
+    titleRow.append(el("strong", "official-label", source.label));
+    if (source.verified) titleRow.append(el("em", "official-verified", "已认证"));
+    copy.append(titleRow);
+    copy.append(el("span", "official-note", source.note));
+    link.append(copy, el("span", "official-arrow", "↗"));
+    const button = el("button", "official-copy-btn", "复制");
+    button.type = "button";
+    button.dataset.copySource = source.id;
+    button.setAttribute("aria-label", `复制${source.platform}${source.label}的链接或账号`);
+    row.append(link, button);
+    box.append(row);
+  }
+}
+
+function lineupThumb(kind, item) {
+  const button = el("button", "lineup-thumb");
+  button.type = "button";
+  button.setAttribute("aria-label", item.name || "打开媒体");
+  if (kind === "photo") {
+    const image = document.createElement("img");
+    image.alt = item.name || "照片";
+    image.loading = "lazy";
+    image.src = item.curated ? item.thumb || item.src : item.dataUrl;
+    button.append(image);
+  } else if (item.poster) {
+    const image = document.createElement("img");
+    image.alt = item.name || "视频封面";
+    image.loading = "lazy";
+    image.src = item.poster;
+    button.append(image);
+  } else {
+    button.append(el("span", "lineup-play", "▶"));
+  }
+  return button;
+}
+
+function renderMyLineup() {
+  const grid = $("myLineupGrid");
+  const meta = $("myLineupMeta");
+  if (!grid || !meta) return;
+  meta.textContent = `${state.myLineup.length} 条 · 只保存在这台设备`;
+  clearNode(grid);
+  if (!state.myLineup.length) {
+    const empty = el("div", "empty-state");
+    empty.append(
+      el("strong", "", "还没有收进片单"),
+      el("p", "", "在胶片仓库或最近看过里，点「＋片单」；也可以从手机上传自己的照片和视频。这里的内容不会同步到公网。")
+    );
+    grid.append(empty);
+    renderRecentStrip();
+    return;
+  }
+  for (const entry of state.myLineup) {
+    const resolved = resolveLineupEntry(entry);
+    const card = el("article", `lineup-card${resolved.available ? "" : " missing"}`);
+    if (resolved.available) {
+      const mediaItem = resolved.media;
+      const thumb = lineupThumb(entry.kind, mediaItem);
+      thumb.addEventListener("click", () => openResolvedMedia(entry.kind, mediaItem));
+      const info = el("div", "lineup-info");
+      info.append(el("strong", "", mediaItem.name || entry.name));
+      info.append(el("span", "", entry.kind === "photo" ? "照片" : "视频"));
+      const remove = el("button", "text-btn", "移出");
+      remove.type = "button";
+      remove.dataset.lineupRemove = entry.id;
+      card.append(thumb, info, remove);
+    } else {
+      const missing = el("div", "lineup-thumb lineup-thumb-missing", "已下架");
+      const info = el("div", "lineup-info");
+      info.append(el("strong", "", entry.name || "未命名"));
+      info.append(el("span", "", "文件已删除，建议移出"));
+      const remove = el("button", "text-btn", "移出");
+      remove.type = "button";
+      remove.dataset.lineupRemove = entry.id;
+      card.append(missing, info, remove);
+    }
+    grid.append(card);
+  }
+  renderRecentStrip();
+}
+
+function renderRecentStrip() {
+  const wrap = $("recentStripWrap");
+  const strip = $("recentStrip");
+  if (!wrap || !strip) return;
+  clearNode(strip);
+  recentMediaCache = [];
+  for (const entry of state.recentMedia) {
+    if (isInLineup(entry.kind, entry.ref)) continue;
+    const resolved = resolveLineupEntry(entry);
+    if (!resolved.available) continue;
+    const descriptor = mediaDescriptor(entry.kind, resolved.media);
+    if (!descriptor) continue;
+    const index = recentMediaCache.length;
+    recentMediaCache.push(descriptor);
+    const button = el("button", "recent-item");
+    button.type = "button";
+    button.dataset.recentIndex = String(index);
+    button.setAttribute("aria-label", `把${descriptor.name}收进片单`);
+    if (entry.kind === "photo") {
+      const image = document.createElement("img");
+      image.alt = descriptor.name;
+      image.loading = "lazy";
+      image.src = resolved.media.curated ? resolved.media.thumb || resolved.media.src : resolved.media.dataUrl;
+      button.append(image);
+    } else if (resolved.media.poster) {
+      const image = document.createElement("img");
+      image.alt = descriptor.name;
+      image.loading = "lazy";
+      image.src = resolved.media.poster;
+      button.append(image);
+    } else {
+      button.append(el("span", "recent-play", "▶"));
+    }
+    button.append(el("span", "recent-add", "＋"));
+    strip.append(button);
+    if (recentMediaCache.length >= 8) break;
+  }
+  wrap.hidden = recentMediaCache.length === 0;
+}
+
 function renderRoles() {
   const grid = $("roleGrid");
   clearNode(grid);
@@ -381,11 +655,72 @@ function renderRoles() {
   }
 }
 
-function openLightbox(src, alt) {
+function updateLightboxLineupButton() {
+  const button = $("lightboxLineupBtn");
+  if (!button) return;
+  if (!lightboxMedia) {
+    button.hidden = true;
+    return;
+  }
+  const added = isInLineup(lightboxMedia.kind, lightboxMedia.ref);
+  button.hidden = false;
+  button.textContent = added ? "✓ 已在本周片单" : "＋ 加入本周片单";
+  button.setAttribute("aria-pressed", String(added));
+}
+
+function openLightbox(src, alt, descriptor = null) {
   if (!src) return;
-  $("lightboxImage").src = src;
-  $("lightboxImage").alt = alt || "照片大图";
+  lightboxMedia = descriptor;
+  const bar = $("lightboxBar");
+  if (bar) bar.hidden = !descriptor;
+  const image = $("lightboxImage");
+  const video = $("lightboxVideo");
+  if (descriptor?.kind === "video") {
+    image.hidden = true;
+    image.removeAttribute("src");
+    video.hidden = false;
+    video.pause();
+    if (lightboxBlobUrl) {
+      URL.revokeObjectURL(lightboxBlobUrl);
+      lightboxBlobUrl = "";
+    }
+    attachVideoSource(video, src).then(() => video.play().catch(() => {}));
+  } else {
+    video.pause();
+    video.hidden = true;
+    video.removeAttribute("src");
+    if (lightboxBlobUrl) {
+      URL.revokeObjectURL(lightboxBlobUrl);
+      lightboxBlobUrl = "";
+    }
+    image.hidden = false;
+    image.src = src;
+    image.alt = alt || "照片大图";
+  }
+  $("lightboxTitle").textContent = alt || "";
+  updateLightboxLineupButton();
   $("lightbox").classList.remove("is-hidden");
+  if (descriptor) rememberRecent(descriptor.kind, descriptor.ref);
+}
+
+function closeLightbox() {
+  const video = $("lightboxVideo");
+  if (video) {
+    video.pause();
+    video.hidden = true;
+    video.removeAttribute("src");
+    try {
+      video.load();
+    } catch {
+      /* 忽略旧浏览器 */
+    }
+  }
+  if (lightboxBlobUrl) {
+    URL.revokeObjectURL(lightboxBlobUrl);
+    lightboxBlobUrl = "";
+  }
+  lightboxMedia = null;
+  $("lightbox").classList.add("is-hidden");
 }
 
 const PHOTO_EAGER_COUNT = 8;
@@ -473,13 +808,22 @@ function renderGallery() {
       }
       image.fetchPriority = index < 4 ? "high" : "auto";
       registerPhotoElement(image, photo.thumb || photo.src, index < PHOTO_EAGER_COUNT || !photo.curated);
-      image.addEventListener("click", () => openLightbox(photo.src, photo.name));
+      image.addEventListener("click", () => openLightbox(photo.src, photo.name, mediaDescriptor("photo", photo)));
       image.addEventListener("error", () => {
         image.replaceWith(el("div", "media-placeholder", "照片文件未找到\n请检查 media/photos"));
       });
       const overlay = el("div", "media-overlay");
       overlay.append(el("span", "", photo.name || "未命名照片"));
       const buttons = el("span", "");
+      const add = el("button", "", "＋");
+      add.type = "button";
+      add.title = "加入本周片单";
+      add.setAttribute("aria-label", "把这张照片加入我的本周片单");
+      add.addEventListener("click", (event) => {
+        event.stopPropagation();
+        addToLineup(mediaDescriptor("photo", photo));
+      });
+      buttons.append(add);
       const favorite = el("button", "", isFavorite("photos", photo.id) ? "♥" : "♡");
       favorite.type = "button";
       favorite.setAttribute("aria-label", "收藏照片");
@@ -533,22 +877,26 @@ function renderGallery() {
         delete node.dataset.src;
         node.controls = true;
         playBadge.textContent = "正在加载…";
-        try {
-          const response = await fetch(source);
-          if (!response.ok) throw new Error(`视频加载失败：${response.status}`);
-          const blob = await response.blob();
-          node.src = URL.createObjectURL(blob);
-        } catch {
-          node.src = source;
-        }
+        await attachVideoSource(node, source);
         playBadge.remove();
         node.play().catch(() => {});
+        const descriptor = mediaDescriptor("video", video);
+        if (descriptor) rememberRecent("video", descriptor.ref);
       };
       node.addEventListener("click", startVideo);
       node.setAttribute("aria-label", video.name || "视频");
       const overlay = el("div", "media-overlay");
       overlay.append(el("span", "", video.name || "未命名视频"));
       const buttons = el("span", "");
+      const add = el("button", "", "＋");
+      add.type = "button";
+      add.title = "加入本周片单";
+      add.setAttribute("aria-label", "把这段视频加入我的本周片单");
+      add.addEventListener("click", (event) => {
+        event.stopPropagation();
+        addToLineup(mediaDescriptor("video", video));
+      });
+      buttons.append(add);
       const favorite = el("button", "", isFavorite("videos", video.id) ? "♥" : "♡");
       favorite.type = "button";
       favorite.setAttribute("aria-label", "收藏视频");
@@ -689,6 +1037,8 @@ function renderSettings() {
 
 function renderAll() {
   renderToday();
+  renderOfficialSources();
+  renderMyLineup();
   renderStats();
   renderRoles();
   renderGallery();
@@ -738,53 +1088,61 @@ async function deleteVideo(id) {
   toast("视频已删除");
 }
 
-async function addPhotoFile(file) {
-  if (!file) return;
+async function addPhotoFile(file, options = {}) {
+  if (!file) return null;
   try {
     let dataUrl = await compressImage(file, { maxWidth: 1600, quality: 0.82 });
     if (dataUrl.length > MAX_PHOTO_DATA_LENGTH) {
       dataUrl = await compressImage(file, { maxWidth: 1200, quality: 0.72 });
     }
     if (dataUrl.length > MAX_PHOTO_DATA_LENGTH) throw new Error("照片压缩后仍然太大，请换一张更小的图");
-    await put("photos", {
+    const created = {
       id: createId("photo"),
       name: file.name || "本地照片",
       dataUrl,
       createdAt: new Date().toISOString(),
       size: file.size
-    });
+    };
+    await put("photos", created);
     await loadMedia();
     galleryTab = "photos";
     renderGallery();
     renderStats();
-    toast("照片已放进胶片仓库");
+    if (options.addToLineup) addToLineup(mediaDescriptor("photo", created));
+    toast(options.addToLineup ? "照片已加入我的本周片单" : "照片已放进胶片仓库");
+    return created;
   } catch (error) {
     toast(error.message || "照片添加失败");
+    return null;
   }
 }
 
-async function addVideoFile(file) {
-  if (!file) return;
+async function addVideoFile(file, options = {}) {
+  if (!file) return null;
   if (file.size > MAX_VIDEO_BYTES) {
     toast("视频超过 300MB，请放进 media/videos 文件夹管理");
-    return;
+    return null;
   }
   try {
-    await put("videos", {
+    const created = {
       id: createId("video"),
       name: file.name || "本地视频",
       blob: file,
       size: file.size,
       type: file.type || "video/mp4",
       createdAt: new Date().toISOString()
-    });
+    };
+    await put("videos", created);
     await loadMedia();
     galleryTab = "videos";
     renderGallery();
     renderStats();
-    toast("视频已放进胶片仓库");
+    if (options.addToLineup) addToLineup(mediaDescriptor("video", created));
+    toast(options.addToLineup ? "视频已加入我的本周片单" : "视频已放进胶片仓库");
+    return created;
   } catch (error) {
     toast(error.message || "视频添加失败");
+    return null;
   }
 }
 
@@ -800,6 +1158,92 @@ async function importNewsFile(file) {
     dailyOffset = 0;
     renderAll();
     toast(`本周片单已导入，新增 ${Math.max(0, state.news.length - before)} 条`);
+  } catch (error) {
+    toast(error.message || "片单导入失败");
+  }
+}
+
+function exportMyLineup() {
+  if (!state.myLineup.length) {
+    toast("我的片单还是空的");
+    return;
+  }
+  const items = [];
+  let missing = 0;
+  let localVideos = 0;
+  for (const entry of state.myLineup) {
+    const resolved = resolveLineupEntry(entry);
+    if (!resolved.available) {
+      missing += 1;
+      continue;
+    }
+    const mediaItem = resolved.media;
+    if (entry.kind === "photo" && !mediaItem.curated) {
+      items.push({ kind: "photo", name: mediaItem.name, dataUrl: mediaItem.dataUrl });
+    } else if (entry.kind === "video" && !mediaItem.curated) {
+      items.push({ kind: "video", name: mediaItem.name, localOnly: true });
+      localVideos += 1;
+    } else {
+      items.push({ kind: entry.kind, name: mediaItem.name, src: entry.ref });
+    }
+  }
+  const payload = buildLineupPack(items, { ticketCode: state.ticketCode });
+  downloadJSON(`白鹿我的片单-${toLocalDateKey()}.json`, payload);
+  toast(
+    missing
+      ? `片单已导出；${missing} 条已下架的内容没有写入`
+      : localVideos
+        ? `片单已导出；${localVideos} 段本机视频只记录名称，换设备后需要重新上传`
+        : "片单已导出"
+  );
+}
+
+async function importLineupFile(file) {
+  if (!file) return;
+  try {
+    const payload = await readJSONFile(file);
+    const result = validateLineupPack(payload);
+    if (!result.ok) throw new Error(result.error);
+    const existing = new Set(state.myLineup.map((entry) => lineupKey(entry)));
+    let added = 0;
+    let skipped = 0;
+    for (const item of result.items) {
+      if (item.localOnly) {
+        skipped += 1;
+        continue;
+      }
+      let ref = item.ref || item.src;
+      if (item.dataUrl) {
+        const created = {
+          id: createId("photo"),
+          name: item.name,
+          dataUrl: item.dataUrl,
+          createdAt: new Date().toISOString(),
+          size: 0
+        };
+        await put("photos", created);
+        ref = created.id;
+      }
+      if (!ref) {
+        skipped += 1;
+        continue;
+      }
+      const key = `${item.kind}:${ref}`;
+      if (existing.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      state.myLineup.push(
+        normalizeLineupItem({ kind: item.kind, ref, name: item.name, src: item.src })
+      );
+      existing.add(key);
+      added += 1;
+    }
+    state.myLineup = state.myLineup.slice(0, MAX_LINEUP);
+    await loadMedia();
+    saveState();
+    renderAll();
+    toast(`片单已导入：新增 ${added} 条${skipped ? `，跳过 ${skipped} 条` : ""}`);
   } catch (error) {
     toast(error.message || "片单导入失败");
   }
@@ -974,6 +1418,55 @@ function bindEvents() {
     const file = event.target.files?.[0];
     await importNewsFile(file);
     event.target.value = "";
+  });
+  $("openLineupBtn").addEventListener("click", () => {
+    navigate("today");
+    $("myLineupSection").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("lineupPhotoBtn").addEventListener("click", () => $("lineupPhotoInput").click());
+  $("lineupVideoBtn").addEventListener("click", () => $("lineupVideoInput").click());
+  $("lineupPhotoInput").addEventListener("change", async (event) => {
+    await addPhotoFile(event.target.files?.[0], { addToLineup: true });
+    event.target.value = "";
+  });
+  $("lineupVideoInput").addEventListener("change", async (event) => {
+    await addVideoFile(event.target.files?.[0], { addToLineup: true });
+    event.target.value = "";
+  });
+  $("exportLineupBtn").addEventListener("click", exportMyLineup);
+  $("importLineupBtn").addEventListener("click", () => $("lineupFileInput").click());
+  $("lineupFileInput").addEventListener("change", async (event) => {
+    await importLineupFile(event.target.files?.[0]);
+    event.target.value = "";
+  });
+  $("myLineupGrid").addEventListener("click", (event) => {
+    const removeButton = event.target.closest("[data-lineup-remove]");
+    if (!removeButton) return;
+    state.myLineup = state.myLineup.filter((entry) => entry.id !== removeButton.dataset.lineupRemove);
+    saveState();
+    renderMyLineup();
+    toast("已从我的片单移出");
+  });
+  $("recentStrip").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-recent-index]");
+    if (!button) return;
+    const descriptor = recentMediaCache[Number(button.dataset.recentIndex)];
+    if (descriptor) addToLineup(descriptor);
+  });
+  $("officialBox").addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-copy-source]");
+    if (!button) return;
+    const source = OFFICIAL_SOURCES.find((item) => item.id === button.dataset.copySource);
+    if (!source) return;
+    const value = source.copy || source.url;
+    const ok = await copyText(value);
+    toast(
+      ok
+        ? source.copyKind === "id"
+          ? `已复制${source.platform}号：${value}，去 App 搜索`
+          : `已复制链接：${value}`
+        : "复制失败，请长按链接手动复制"
+    );
   });
 
   $("settingsBtn").addEventListener("click", () => {
@@ -1163,13 +1656,18 @@ function bindEvents() {
   $("confirmModal").addEventListener("click", (event) => {
     if (event.target === $("confirmModal")) finishConfirm(false);
   });
-  $("lightboxClose").addEventListener("click", () => $("lightbox").classList.add("is-hidden"));
+  $("lightboxClose").addEventListener("click", closeLightbox);
   $("lightbox").addEventListener("click", (event) => {
-    if (event.target === $("lightbox")) $("lightbox").classList.add("is-hidden");
+    if (event.target === $("lightbox")) closeLightbox();
+  });
+  $("lightboxLineupBtn").addEventListener("click", () => {
+    if (!lightboxMedia) return;
+    addToLineup(lightboxMedia);
+    updateLightboxLineupButton();
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
-    $("lightbox").classList.add("is-hidden");
+    closeLightbox();
     closeSettings();
     if (confirmResolver) finishConfirm(false);
   });
