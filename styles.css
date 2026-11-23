@@ -456,6 +456,7 @@ a { color: inherit; }
 .media-card.video { aspect-ratio: 16 / 11; background: #151210; }
 .media-card img, .media-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .media-card.video video { object-fit: contain; }
+.video-play-badge { position: absolute; inset: 0 0 44px; display: grid; place-items: center; color: #fff; background: radial-gradient(circle, rgba(10, 8, 7, 0.42), transparent 62%); font-family: var(--serif); font-size: 17px; letter-spacing: 0.08em; pointer-events: none; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65); }
 .media-overlay { position: absolute; inset: auto 0 0; display: flex; align-items: end; justify-content: space-between; gap: 8px; padding: 32px 12px 12px; background: linear-gradient(transparent, rgba(10, 8, 7, 0.82)); color: #fff; font-size: 11px; }
 .media-overlay button { border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 14px; }
 .media-placeholder { display: grid; place-items: center; width: 100%; height: 100%; padding: 18px; color: rgba(243, 237, 227, 0.64); background: repeating-linear-gradient(90deg, rgba(243, 237, 227, 0.06) 0 6px, transparent 6px 14px), linear-gradient(145deg, #251f1b, #100e0d); text-align: center; font-family: var(--serif); font-size: 18px; line-height: 1.45; }

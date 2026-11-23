@@ -179,12 +179,7 @@ function navigate(room) {
     else button.removeAttribute("aria-current");
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (allowed === "gallery") {
-    requestAnimationFrame(() => {
-      loadPhotosNearViewport();
-      loadVideosNearViewport();
-    });
-  }
+  if (allowed === "gallery") requestAnimationFrame(loadPhotosNearViewport);
 }
 
 async function loadMedia() {
@@ -424,20 +419,6 @@ function loadPhotosNearViewport() {
   }
 }
 
-function loadVideosNearViewport() {
-  if (galleryTab !== "videos") return;
-  const view = document.querySelector("#view-gallery");
-  if (!view?.classList.contains("active")) return;
-  for (const node of document.querySelectorAll("#videoGrid video[data-src]")) {
-    const rect = node.getBoundingClientRect();
-    if (rect.bottom >= -300 && rect.top <= window.innerHeight + 300) {
-      node.preload = "metadata";
-      node.src = node.dataset.src;
-      delete node.dataset.src;
-    }
-  }
-}
-
 function registerPhotoElement(image, src, eager) {
   image.loading = "eager";
   image.decoding = "async";
@@ -516,10 +497,7 @@ function renderGallery() {
     });
   }
 
-  requestAnimationFrame(() => {
-    loadPhotosNearViewport();
-    loadVideosNearViewport();
-  });
+  requestAnimationFrame(loadPhotosNearViewport);
 
   const videoGrid = $("videoGrid");
   clearNode(videoGrid);
@@ -545,13 +523,17 @@ function renderGallery() {
       node.setAttribute("playsinline", "");
       node.setAttribute("webkit-playsinline", "");
       node.setAttribute("x5-playsinline", "");
-      node.addEventListener("pointerdown", () => {
+      const playBadge = el("span", "video-play-badge", "▶ 点击播放");
+      const startVideo = () => {
         if (!node.src && node.dataset.src) {
           node.preload = "metadata";
           node.src = node.dataset.src;
           delete node.dataset.src;
+          playBadge.remove();
+          node.play().catch(() => {});
         }
-      });
+      };
+      node.addEventListener("click", startVideo);
       node.setAttribute("aria-label", video.name || "视频");
       const overlay = el("div", "media-overlay");
       overlay.append(el("span", "", video.name || "未命名视频"));
@@ -575,7 +557,7 @@ function renderGallery() {
         buttons.append(del);
       }
       overlay.append(buttons);
-      card.append(node, overlay);
+      card.append(node, playBadge, overlay);
       videoGrid.append(card);
     }
   }
