@@ -725,24 +725,14 @@ function closeLightbox() {
 
 const PHOTO_EAGER_COUNT = 8;
 const PHOTO_LOAD_MARGIN = 800;
-let photoLazyObserver = null;
 let photoLoadTimer = 0;
-
-function getPhotoObserver() {
-  if (photoLazyObserver || !("IntersectionObserver" in window)) return photoLazyObserver;
-  photoLazyObserver = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) loadPhotoElement(entry.target);
-    }
-  }, { rootMargin: `${PHOTO_LOAD_MARGIN}px 0px` });
-  return photoLazyObserver;
-}
 
 function loadPhotoElement(image) {
   if (!image?.dataset.src) return;
   const src = image.dataset.src;
   delete image.dataset.src;
-  photoLazyObserver?.unobserve(image);
+  const rect = image.getBoundingClientRect();
+  image.fetchPriority = rect.bottom > 0 && rect.top < window.innerHeight ? "high" : "low";
   image.src = src;
 }
 
@@ -758,22 +748,22 @@ function loadPhotosNearViewport() {
 }
 
 function schedulePhotoLoad() {
-  if (photoLoadTimer) return;
+  clearTimeout(photoLoadTimer);
   photoLoadTimer = setTimeout(() => {
     photoLoadTimer = 0;
     loadPhotosNearViewport();
-  }, 100);
+  }, 220);
 }
 
 function registerPhotoElement(image, src, eager) {
-  image.loading = "eager";
+  image.loading = eager ? "eager" : "lazy";
   image.decoding = "async";
-  if (eager || !("IntersectionObserver" in window)) {
+  image.fetchPriority = eager ? "high" : "auto";
+  if (eager) {
     image.src = src;
     return;
   }
   image.dataset.src = src;
-  getPhotoObserver()?.observe(image);
 }
 
 function renderGallery() {
