@@ -525,7 +525,7 @@ function renderGallery() {
       node.setAttribute("playsinline", "");
       node.setAttribute("webkit-playsinline", "");
       node.setAttribute("x5-playsinline", "");
-      node.poster = galleryTab === "videos" ? video.poster : "";
+      if (galleryTab === "videos" && video.poster) node.poster = video.poster;
       const playBadge = el("span", "video-play-badge", "▶ 点击播放");
       const startVideo = async () => {
         if (node.src || !node.dataset.src) return;
