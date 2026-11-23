@@ -211,6 +211,7 @@ function allPhotos() {
       name: photo.name || photo.caption || "官方照片",
       src: photo.src,
       thumb: photo.thumb || photo.src,
+      blur: photo.blur || "",
       curated: true,
       createdAt: photo.createdAt || ""
     }));
@@ -481,6 +482,12 @@ function renderGallery() {
       const card = el("article", "media-card photo");
       const image = document.createElement("img");
       image.alt = photo.name || "照片";
+      image.style.color = "transparent";
+      if (photo.blur) {
+        image.style.backgroundImage = `url("${photo.blur}")`;
+        image.style.backgroundSize = "cover";
+        image.style.backgroundPosition = "center";
+      }
       image.fetchPriority = index < 4 ? "high" : "auto";
       registerPhotoElement(image, photo.thumb || photo.src, index < PHOTO_EAGER_COUNT || !photo.curated);
       image.addEventListener("click", () => openLightbox(photo.src, photo.name));
