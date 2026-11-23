@@ -179,6 +179,7 @@ function navigate(room) {
     else button.removeAttribute("aria-current");
   });
   window.scrollTo({ top: 0, behavior: "smooth" });
+  if (allowed === "gallery") requestAnimationFrame(loadPhotosNearViewport);
 }
 
 async function loadMedia() {
@@ -383,6 +384,50 @@ function openLightbox(src, alt) {
   $("lightbox").classList.remove("is-hidden");
 }
 
+const PHOTO_EAGER_COUNT = 8;
+const PHOTO_LOAD_MARGIN = 800;
+let photoLazyObserver = null;
+
+function getPhotoObserver() {
+  if (photoLazyObserver || !("IntersectionObserver" in window)) return photoLazyObserver;
+  photoLazyObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) loadPhotoElement(entry.target);
+    }
+  }, { rootMargin: `${PHOTO_LOAD_MARGIN}px 0px` });
+  return photoLazyObserver;
+}
+
+function loadPhotoElement(image) {
+  if (!image?.dataset.src) return;
+  const src = image.dataset.src;
+  delete image.dataset.src;
+  photoLazyObserver?.unobserve(image);
+  image.src = src;
+}
+
+function loadPhotosNearViewport() {
+  const view = document.querySelector("#view-gallery");
+  if (!view?.classList.contains("active")) return;
+  for (const image of document.querySelectorAll("#photoGrid img[data-src]")) {
+    const rect = image.getBoundingClientRect();
+    if (rect.bottom >= -PHOTO_LOAD_MARGIN && rect.top <= window.innerHeight + PHOTO_LOAD_MARGIN) {
+      loadPhotoElement(image);
+    }
+  }
+}
+
+function registerPhotoElement(image, src, eager) {
+  image.loading = "eager";
+  image.decoding = "async";
+  if (eager || !("IntersectionObserver" in window)) {
+    image.src = src;
+    return;
+  }
+  image.dataset.src = src;
+  getPhotoObserver()?.observe(image);
+}
+
 function renderGallery() {
   const photos = allPhotos();
   const videos = allVideos();
@@ -412,13 +457,11 @@ function renderGallery() {
     empty.append(button);
     photoGrid.append(empty);
   } else {
-    for (const photo of photos) {
+    photos.forEach((photo, index) => {
       const card = el("article", "media-card photo");
       const image = document.createElement("img");
-      image.src = photo.src;
       image.alt = photo.name || "照片";
-      image.loading = "lazy";
-      image.decoding = "async";
+      registerPhotoElement(image, photo.src, index < PHOTO_EAGER_COUNT || !photo.curated);
       image.addEventListener("click", () => openLightbox(photo.src, photo.name));
       image.addEventListener("error", () => {
         image.replaceWith(el("div", "media-placeholder", "照片文件未找到\n请检查 media/photos"));
@@ -442,8 +485,10 @@ function renderGallery() {
       overlay.append(buttons);
       card.append(image, overlay);
       photoGrid.append(card);
-    }
+    });
   }
+
+  requestAnimationFrame(loadPhotosNearViewport);
 
   const videoGrid = $("videoGrid");
   clearNode(videoGrid);
